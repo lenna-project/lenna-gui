@@ -4,8 +4,8 @@
     "version": "0.1.0"
   },
   "build": {
-    "distDir": "frontend",
-    "devPath": "localhost",
+    "distDir": "Set automatically by Vue CLI plugin",
+    "devPath": "Set automatically by Vue CLI plugin",
     "beforeDevCommand": "",
     "beforeBuildCommand": ""
   },
@@ -13,7 +13,7 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.tauri.dev",
+      "identifier": "app.lenna.gui",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
@@ -53,7 +53,7 @@
     },
     "windows": [
       {
-        "title": "Lenna",
+        "title": "Lenna App",
         "width": 800,
         "height": 600,
         "resizable": true,
