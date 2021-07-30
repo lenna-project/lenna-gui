@@ -1,15 +1,13 @@
 <template>
-  <About />
+  <Home />
 </template>
 
 <script>
-import About from './views/About.vue'
 import Home from './views/Home.vue'
 
 export default {
   name: 'Lenna App',
   components: {
-    About,
     Home
   }
 }

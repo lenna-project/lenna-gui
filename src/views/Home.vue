@@ -1,29 +1,36 @@
 <template>
-    <div class="main">
-      <h1>Convert images online without upload of your data</h1>
-      <h2 v-if="just">{{ just }}</h2>
-      <div class="top_main">
-        <div id="process">
-          <button class="v-step-5" v-on:click="processImages">
-            process images
-          </button>
-        </div>
-      </div>
-      <div class="bottom_main">
-      </div>
-      <div id="line">
-        <hr />
-        <div class="plus radius" v-on:click="onMorePlugins()"></div>
+  <div class="main">
+    <h1>Convert images online without upload of your data {{message}}</h1>
+    <div class="top_main">
+      <div id="process">
+        <button class="v-step-5" v-on:click="processImages">
+          process images
+        </button>
       </div>
     </div>
+    <div class="bottom_main"></div>
+    <div id="line">
+      <hr />
+      <div class="plus radius" v-on:click="onMorePlugins()"></div>
+    </div>
+  </div>
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
+import { invoke } from "@tauri-apps/api/tauri";
 
 export default defineComponent({
   name: "Home",
-  components: {
+  components: {},
+  data() {
+    return {
+      message: "none"
+    }
+  },
+  created() {
+    invoke("my_custom_command").then((message) => {this.message = message;})
+    .catch((error) => console.error(error));
   },
 });
 </script>
