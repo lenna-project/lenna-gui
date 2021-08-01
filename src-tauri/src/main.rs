@@ -12,6 +12,7 @@ struct State(Pool);
 struct Plugin {
   name: String,
   description: String,
+  config: serde_json::Value,
 }
 
 #[tauri::command]
@@ -34,6 +35,7 @@ async fn get_plugin(state: tauri::State<'_, State>, id: String) -> Result<Plugin
     Some(plugin) => Ok(Plugin {
       name: plugin.name(),
       description: plugin.description(),
+      config: plugin.default_config(),
     }),
     _ => Err("No such plugin".into()),
   }

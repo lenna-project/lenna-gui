@@ -19,11 +19,18 @@
     </div>
     <div v-if="enabled">
       <span>{{ plugin.description }}</span>
+      <PluginConfig
+          :key="pluginKey"
+          :defaultConfig="config"
+          @changeConfig="updateConfig($event)"
+        />
     </div>
   </div>
 </template>
 
 <script>
+import PluginConfig from "./PluginConfig.vue";
+
 export default {
   name: "Plugin",
   props: {
@@ -32,6 +39,7 @@ export default {
     defaultConfig: Object,
   },
   components: {
+    PluginConfig,
   },
   data() {
     return {

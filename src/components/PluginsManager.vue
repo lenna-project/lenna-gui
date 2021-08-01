@@ -5,7 +5,7 @@
         <Plugin
           :name="item.name"
           :plugin="item"
-          :defaultConfig="defaultConfig"
+          :defaultConfig="item.config"
           @changeEnabled="changeEnabled(item.name, $event)"
           @changeConfig="changeConfig(item.name, $event)"
         />
