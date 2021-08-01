@@ -8,6 +8,12 @@ use lenna_core::{Config, Pool};
 
 struct State(Pool);
 
+#[derive(serde::Serialize)]
+struct Plugin {
+  name: String,
+  description: String,
+}
+
 #[tauri::command]
 async fn get_config() -> Result<Config, String> {
   let config_file = std::fs::File::open("lenna.yml").unwrap();
@@ -22,10 +28,13 @@ async fn get_plugin_ids(state: tauri::State<'_, State>) -> Result<Vec<String>, S
 }
 
 #[tauri::command]
-async fn get_plugin(state: tauri::State<'_, State>, id: String) -> Result<String, String> {
+async fn get_plugin(state: tauri::State<'_, State>, id: String) -> Result<Plugin, String> {
   let plugin = state.0.get(&id);
   match plugin {
-    Some(plugin) => Ok(plugin.description()),
+    Some(plugin) => Ok(Plugin {
+      name: plugin.name(),
+      description: plugin.description(),
+    }),
     _ => Err("No such plugin".into()),
   }
 }

@@ -2,7 +2,13 @@
   <div class="plugins-manager">
     <draggable class="dragArea list-group plugins" :list="plugins">
       <div class="list-group-item" v-for="item in plugins" :key="item.name">
-        {{item}}
+        <Plugin
+          :name="item.name"
+          :plugin="item"
+          :defaultConfig="defaultConfig"
+          @changeEnabled="changeEnabled(item.name, $event)"
+          @changeConfig="changeConfig(item.name, $event)"
+        />
       </div>
     </draggable>
   </div>
@@ -11,6 +17,7 @@
 <script>
 import { defineComponent } from "vue";
 import { VueDraggableNext } from "vue-draggable-next";
+import Plugin from "@/components/Plugin.vue";
 import { invoke } from "@tauri-apps/api/tauri";
 
 export default defineComponent({
@@ -18,6 +25,7 @@ export default defineComponent({
   props: {},
   components: {
     draggable: VueDraggableNext,
+    Plugin,
   },
   data() {
     return {
@@ -26,8 +34,14 @@ export default defineComponent({
   },
   created() {
     invoke("get_plugin_ids")
-      .then((message) => {
-        this.plugins = message;
+      .then((plugins) => {
+        plugins.forEach((plugin) => {
+          invoke("get_plugin", { id: plugin })
+            .then((plugin) => {
+              this.plugins.push(plugin);
+            })
+            .catch((error) => console.error(error));
+        });
       })
       .catch((error) => console.error(error));
   },
