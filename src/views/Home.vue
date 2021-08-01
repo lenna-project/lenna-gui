@@ -1,6 +1,7 @@
 <template>
   <div class="main">
     <h1>Convert images online without upload of your data {{message}}</h1>
+    <PluginsManager />
     <div class="top_main">
       <div id="process">
         <button class="v-step-5" v-on:click="processImages">
@@ -19,10 +20,13 @@
 <script>
 import { defineComponent } from "vue";
 import { invoke } from "@tauri-apps/api/tauri";
+import PluginsManager from '@/components/PluginsManager.vue'
 
 export default defineComponent({
   name: "Home",
-  components: {},
+  components: {
+    PluginsManager
+  },
   data() {
     return {
       message: "none"
