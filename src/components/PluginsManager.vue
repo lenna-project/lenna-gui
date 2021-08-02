@@ -35,10 +35,19 @@ export default defineComponent({
   created() {
     invoke("get_plugin_ids")
       .then((plugins) => {
-        plugins.forEach((plugin) => {
-          invoke("get_plugin", { id: plugin })
+        plugins.forEach((id) => {
+          invoke("get_plugin", { id })
             .then((plugin) => {
-              this.plugins.push(plugin);
+              invoke("get_plugin_config", { id: plugin.name })
+                .then((config) => {
+                  delete config.id;
+                  plugin.config = config;
+                  this.plugins.push(plugin);
+                })
+                .catch((error) => {
+                  this.plugins.push(plugin);
+                  console.error(error);
+                });
             })
             .catch((error) => console.error(error));
         });

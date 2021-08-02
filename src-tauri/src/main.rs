@@ -4,35 +4,38 @@
 )]
 
 use lenna_cli::plugins;
-use lenna_core::{Config, Pool};
+use lenna_core::{Config, Pool, ProcessorConfig};
 
-struct State(Pool);
+struct State {
+  pool: Pool,
+  config: Config
+}
 
 #[derive(serde::Serialize)]
 struct Plugin {
+  id: String,
   name: String,
   description: String,
   config: serde_json::Value,
 }
 
 #[tauri::command]
-async fn get_config() -> Result<Config, String> {
-  let config_file = std::fs::File::open("lenna.yml").unwrap();
-  let config: Config = serde_yaml::from_reader(config_file).unwrap();
-  Ok(config)
+async fn get_config(state: tauri::State<'_, State>) -> Result<Config, String> {
+  Ok(state.config.clone())
 }
 
 #[tauri::command]
 async fn get_plugin_ids(state: tauri::State<'_, State>) -> Result<Vec<String>, String> {
-  let plugin_ids: Vec<String> = state.0.ids();
+  let plugin_ids: Vec<String> = state.pool.ids();
   Ok(plugin_ids)
 }
 
 #[tauri::command]
 async fn get_plugin(state: tauri::State<'_, State>, id: String) -> Result<Plugin, String> {
-  let plugin = state.0.get(&id);
+  let plugin = state.pool.get(&id);
   match plugin {
     Some(plugin) => Ok(Plugin {
+      id: plugin.id(),
       name: plugin.name(),
       description: plugin.description(),
       config: plugin.default_config(),
@@ -42,8 +45,12 @@ async fn get_plugin(state: tauri::State<'_, State>, id: String) -> Result<Plugin
 }
 
 #[tauri::command]
-fn my_custom_command() -> String {
-  "Hello from Rust!".into()
+async fn get_plugin_config(state: tauri::State<'_, State>, id: String) -> Result<ProcessorConfig, String> {
+  let config = state.config.find(id);
+  match config {
+    Some(config) => Ok(config.clone()),
+    _ => Err("No such plugin".into()),
+  }
 }
 
 fn main() {
@@ -57,15 +64,18 @@ fn main() {
 
   let pool: Pool = Pool::default();
 
-  let state = State { 0: pool };
+  let config_file = std::fs::File::open("lenna.yml").unwrap();
+  let config: Config = serde_yaml::from_reader(config_file).unwrap();
+
+  let state = State { pool, config };
 
   tauri::Builder::default()
     .manage(state)
     .invoke_handler(tauri::generate_handler![
-      my_custom_command,
       get_config,
       get_plugin_ids,
-      get_plugin
+      get_plugin,
+      get_plugin_config
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

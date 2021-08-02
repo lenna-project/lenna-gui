@@ -1,6 +1,6 @@
 <template>
   <div class="main">
-    <h1>Convert images online without upload of your data {{message}}</h1>
+    <h1>Convert images online without upload of your data</h1>
     <PluginsManager />
     <div class="top_main">
       <div id="process">
@@ -19,7 +19,6 @@
 
 <script>
 import { defineComponent } from "vue";
-import { invoke } from "@tauri-apps/api/tauri";
 import PluginsManager from '@/components/PluginsManager.vue'
 
 export default defineComponent({
@@ -29,12 +28,9 @@ export default defineComponent({
   },
   data() {
     return {
-      message: "none"
     }
   },
   created() {
-    invoke("my_custom_command").then((message) => {this.message = message;})
-    .catch((error) => console.error(error));
   },
 });
 </script>
