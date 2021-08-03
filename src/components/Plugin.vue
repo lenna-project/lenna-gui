@@ -20,10 +20,10 @@
     <div v-if="enabled">
       <span>{{ plugin.description }}</span>
       <PluginConfig
-          :key="pluginKey"
-          :defaultConfig="config"
-          @changeConfig="updateConfig($event)"
-        />
+        :key="pluginKey"
+        :defaultConfig="config"
+        @changeConfig="updateConfig($event)"
+      />
     </div>
   </div>
 </template>
@@ -51,10 +51,13 @@ export default {
     async loadDefaultConfig() {
       this.config = this.defaultConfig;
     },
+    async updateConfig(config) {
+      this.$emit("changeConfig", config);
+    },
   },
   created() {
     this.loadDefaultConfig();
-  }
+  },
 };
 </script>
 <style scoped lang="scss">
@@ -73,8 +76,8 @@ export default {
   justify-content: space-between;
 }
 .plugin:hover {
-    box-shadow: 10px 10px 5px $shadow;
-    transform: scale(1.1); 
+  box-shadow: 10px 10px 5px $shadow;
+  transform: scale(1.1);
 }
 .plugin h2 {
   font-weight: normal;

@@ -5,10 +5,14 @@
 
 use lenna_cli::plugins;
 use lenna_core::{Config, Pool, ProcessorConfig};
+use serde_json::Value;
+use std::io::Write;
+use std::fs::OpenOptions;
+use std::sync::Mutex;
 
 struct State {
-  pool: Pool,
-  config: Config
+  pool: Mutex<Pool>,
+  config: Mutex<Config>,
 }
 
 #[derive(serde::Serialize)]
@@ -21,18 +25,20 @@ struct Plugin {
 
 #[tauri::command]
 async fn get_config(state: tauri::State<'_, State>) -> Result<Config, String> {
-  Ok(state.config.clone())
+  Ok(state.config.lock().unwrap().clone())
 }
 
 #[tauri::command]
 async fn get_plugin_ids(state: tauri::State<'_, State>) -> Result<Vec<String>, String> {
-  let plugin_ids: Vec<String> = state.pool.ids();
+  let pool = state.pool.lock().unwrap();
+  let plugin_ids: Vec<String> = pool.ids();
   Ok(plugin_ids)
 }
 
 #[tauri::command]
 async fn get_plugin(state: tauri::State<'_, State>, id: String) -> Result<Plugin, String> {
-  let plugin = state.pool.get(&id);
+  let pool = state.pool.lock().unwrap();
+  let plugin = pool.get(&id);
   match plugin {
     Some(plugin) => Ok(Plugin {
       id: plugin.id(),
@@ -45,11 +51,36 @@ async fn get_plugin(state: tauri::State<'_, State>, id: String) -> Result<Plugin
 }
 
 #[tauri::command]
-async fn get_plugin_config(state: tauri::State<'_, State>, id: String) -> Result<ProcessorConfig, String> {
-  let config = state.config.find(id);
+async fn get_plugin_config(
+  state: tauri::State<'_, State>,
+  id: String,
+) -> Result<ProcessorConfig, String> {
+  let lock = state.config.lock().unwrap();
+  let config = lock.find(id);
   match config {
     Some(config) => Ok(config.clone()),
     _ => Err("No such plugin".into()),
+  }
+}
+
+#[tauri::command]
+async fn set_plugin_config(
+  state: tauri::State<'_, State>,
+  id: String,
+  config: Value,
+) -> Result<(), String> {
+  let mut lock = state.config.lock().unwrap();
+  lock.add(id, config.clone());
+
+  let config: lenna_core::Config = lock.clone();
+
+  match serde_yaml::to_string(&config) {
+    Err(value) => Err(value.to_string()),
+    Ok(str) => {
+      let mut config_file = OpenOptions::new().write(true).open("lenna.yml").unwrap();
+      config_file.write_all(str.as_bytes()).unwrap();
+      Ok(())
+    }
   }
 }
 
@@ -67,7 +98,10 @@ fn main() {
   let config_file = std::fs::File::open("lenna.yml").unwrap();
   let config: Config = serde_yaml::from_reader(config_file).unwrap();
 
-  let state = State { pool, config };
+  let state = State {
+    pool: Mutex::new(pool),
+    config: Mutex::new(config),
+  };
 
   tauri::Builder::default()
     .manage(state)
@@ -75,7 +109,8 @@ fn main() {
       get_config,
       get_plugin_ids,
       get_plugin,
-      get_plugin_config
+      get_plugin_config,
+      set_plugin_config,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

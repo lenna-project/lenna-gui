@@ -1,11 +1,12 @@
+---
 pipeline:
-  - id: resize
-    width: 500
-    height: 500
   - id: canny
-    low: 50.0
     high: 100.0
+    low: 50.0
   - id: blur
     sigma: 1.5
   - id: exif-thumbnail
     thumbnail: true
+  - id: resize
+    height: 500
+    width: 500

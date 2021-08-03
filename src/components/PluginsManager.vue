@@ -54,6 +54,15 @@ export default defineComponent({
       })
       .catch((error) => console.error(error));
   },
+  methods: {
+    changeConfig(name, config) {
+      invoke("set_plugin_config", { id: name, config })
+        .then(() => {})
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+  },
 });
 </script>
 <style scoped lang="scss">
