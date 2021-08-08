@@ -1,6 +1,5 @@
 <template>
   <div class="main">
-    <h1>Convert images online without upload of your data</h1>
     <div class="top_main">
       <ImageUpload
         class="v-step-3"
