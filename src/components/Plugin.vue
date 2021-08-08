@@ -20,6 +20,7 @@
     <div v-if="enabled">
       <span>{{ plugin.description }}</span>
       <PluginConfig
+        :name="name"
         :key="pluginKey"
         :defaultConfig="config"
         @changeConfig="updateConfig($event)"
@@ -29,9 +30,10 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
 import PluginConfig from "./PluginConfig.vue";
 
-export default {
+export default defineComponent({
   name: "Plugin",
   props: {
     name: String,
@@ -39,26 +41,36 @@ export default {
     defaultConfig: Object,
   },
   components: {
-    PluginConfig,
+    PluginConfig
   },
   data() {
     return {
+      icon: null,
       enabled: false,
       config: null,
+      ui: null,
+      template: "<div></div>",
+      message: "World!",
+      pluginKey: "key",
     };
   },
   methods: {
     async loadDefaultConfig() {
       this.config = this.defaultConfig;
+      console.log(this.config);
     },
     async updateConfig(config) {
       this.$emit("changeConfig", config);
     },
+    async updateEnabled(enabled) {
+      enabled;
+    },
   },
   created() {
+    console.log("created");
     this.loadDefaultConfig();
   },
-};
+});
 </script>
 <style scoped lang="scss">
 @import "@/styles/_variables.scss";

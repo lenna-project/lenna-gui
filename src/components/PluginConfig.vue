@@ -1,5 +1,6 @@
 <template>
-  <div class="plugin-config" v-if="config">
+  <v-runtime-template :template="template"></v-runtime-template>
+  <div class="plugin-config" v-if="config && ui">
     <div v-for="c in config" :key="c.key">
       <div class="parameter">
         <label>{{ c.key }}: </label>
@@ -14,15 +15,26 @@
   </div>
 </template>
 
-<script lang="ts">
+<script>
+// eslint-disable-next-line no-unused-vars
+import { defineAsyncComponent } from "vue/dist/vue.esm-bundler.js";
+import VRuntimeTemplate from "vue3-runtime-template";
+import { invoke } from "@tauri-apps/api/tauri";
+
 export default {
   name: "PluginConfig",
   props: {
+    name: String,
     defaultConfig: Object,
+  },
+  components: {
+    "v-runtime-template": VRuntimeTemplate,
   },
   data() {
     return {
+      ui: null,
       config: [],
+      template: null
     };
   },
   methods: {
@@ -33,8 +45,15 @@ export default {
       }
       this.$emit("changeConfig", config);
     },
+    async loadUi() {
+      invoke("get_plugin_ui", { id: this.name }).then((v) => {
+        this.template = v.template;
+        console.log(this.template);
+      });
+    },
   },
   created() {
+    this.loadUi();
     for (let key in this.defaultConfig) {
       let config = { key: key, value: this.defaultConfig[key] };
       this.config.push(config);

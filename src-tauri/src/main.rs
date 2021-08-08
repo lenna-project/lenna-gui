@@ -5,9 +5,10 @@
 
 use lenna_cli::plugins;
 use lenna_core::{Config, Pool, ProcessorConfig};
+use scraper::{Html, Selector};
 use serde_json::Value;
-use std::io::Write;
 use std::fs::OpenOptions;
+use std::io::Write;
 use std::sync::Mutex;
 
 struct State {
@@ -21,6 +22,13 @@ struct Plugin {
   name: String,
   description: String,
   config: serde_json::Value,
+}
+
+#[derive(serde::Serialize, serde::Deserialize)]
+struct Ui {
+  template: String,
+  script: String,
+  style: String,
 }
 
 #[tauri::command]
@@ -84,6 +92,28 @@ async fn set_plugin_config(
   }
 }
 
+#[tauri::command]
+async fn get_plugin_ui(state: tauri::State<'_, State>, id: String) -> Result<Ui, String> {
+  let pool = state.pool.lock().unwrap();
+  let plugin = pool.get(&id);
+  match plugin {
+    Some(plugin) => match plugin.config_ui() {
+      Some(ui) => {
+        let fragment = Html::parse_fragment(&ui);
+        let template_selector = Selector::parse("template").unwrap();
+        let template = fragment.select(&template_selector).next().unwrap();
+        Ok(Ui {
+          template: template.inner_html(),
+          script: "".to_string(),
+          style: "".to_string(),
+        })
+      }
+      _ => Err("Plugin has no config ui.".to_string()),
+    },
+    _ => Err("No such plugin.".to_string()),
+  }
+}
+
 fn main() {
   let mut plugins = plugins::Plugins::new();
   let plugins_path = match std::env::var("LENNA_PLUGINS") {
@@ -111,6 +141,7 @@ fn main() {
       get_plugin,
       get_plugin_config,
       set_plugin_config,
+      get_plugin_ui
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
