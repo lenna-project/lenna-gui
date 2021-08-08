@@ -1,5 +1,10 @@
-import { createApp } from 'vue'
-import App from './App.vue'
+import { createApp } from "vue";
+import App from "./App.vue";
 import "@/styles/index.scss";
 
-createApp(App).mount('#app')
+import Toast, { POSITION } from "vue-toastification";
+import "vue-toastification/dist/index.css";
+
+createApp(App)
+  .use(Toast, { position: POSITION.TOP_LEFT })
+  .mount("#app");

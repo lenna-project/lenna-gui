@@ -30,10 +30,12 @@
 
 <script>
 import { defineComponent } from "vue";
+import { useToast } from "vue-toastification";
 import PluginsManager from "@/components/PluginsManager.vue";
 import ImageUpload from "@/components/ImageUpload.vue";
 import ImagePreview from "@/components/ImagePreview.vue";
 import { invoke } from "@tauri-apps/api/tauri";
+import { listen } from "@tauri-apps/api/event";
 
 export default defineComponent({
   name: "Home",
@@ -68,8 +70,20 @@ export default defineComponent({
         console.log(res);
       });
     },
+    async registerEvents() {
+      this.unlistenInfo = await listen("info", (event) => {
+        const toast = useToast();
+        toast.info(event.payload.message);
+      });
+      this.unlistenSuccess = await listen("success", (event) => {
+        const toast = useToast();
+        toast.success(event.payload.message);
+      });
+    },
   },
-  created() {},
+  created() {
+    this.registerEvents();
+  },
 });
 </script>
 <style scoped lang="scss">

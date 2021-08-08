@@ -11,6 +11,7 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::PathBuf;
 use std::sync::Mutex;
+use tauri::Window;
 
 struct State {
   pool: Mutex<Pool>,
@@ -30,6 +31,11 @@ struct Ui {
   template: String,
   script: String,
   style: String,
+}
+
+#[derive(Clone, serde::Serialize)]
+struct Payload {
+  message: String,
 }
 
 #[tauri::command]
@@ -117,6 +123,7 @@ async fn get_plugin_ui(state: tauri::State<'_, State>, id: String) -> Result<Ui,
 
 #[tauri::command]
 async fn process(
+  window: Window,
   state: tauri::State<'_, State>,
   source: String,
   target: String,
@@ -126,6 +133,7 @@ async fn process(
   let pool = state.pool.lock().unwrap();
   let pipeline = Pipeline::new(config.clone(), pool.clone());
   let path = PathBuf::from(source);
+  let mut count = 0;
   for path in images_in_path(&path) {
     let img = lenna_core::io::read::read_from_file(path.to_str().unwrap().to_string());
     match img {
@@ -134,11 +142,29 @@ async fn process(
         pipeline.run(&mut img).unwrap();
         img.path = target.clone();
         lenna_core::io::write::write_to_file(&img, image::ImageOutputFormat::Jpeg(80)).unwrap();
-      }, Err(err) => {
+        window
+          .emit(
+            "info",
+            Payload {
+              message: format!("Saved image {}", img.name),
+            },
+          )
+          .unwrap();
+        count += 1;
+      }
+      Err(err) => {
         println!("{:?}", err);
       }
     }
   }
+  window
+    .emit(
+      "success",
+      Payload {
+        message: format!("converted {} images", count),
+      },
+    )
+    .unwrap();
   Ok(())
 }
 
@@ -152,9 +178,13 @@ fn main() {
   plugins.load_plugins(&plugins_path);
 
   let pool: Pool = Pool::default();
-
-  let config_file = std::fs::File::open("lenna.yml").unwrap();
-  let config: Config = serde_yaml::from_reader(config_file).unwrap();
+  let config: Config = match std::fs::File::open("lenna.yml") {
+    Ok(config_file) => serde_yaml::from_reader(config_file).unwrap(),
+    Err(err) => {
+      println!("{:?}", err);
+      Config::default()
+    }
+  };
 
   let state = State {
     pool: Mutex::new(pool),
