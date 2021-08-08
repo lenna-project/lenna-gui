@@ -1,15 +1,21 @@
 <template>
   <div class="main">
     <h1>Convert images online without upload of your data</h1>
-    <PluginsManager />
     <div class="top_main">
+      <ImageUpload
+        class="v-step-3"
+        ref="imageUpload"
+        @changeImage="changeImages($event)"
+      />
       <div id="process">
         <button class="v-step-5" v-on:click="processImages">
           process images
         </button>
       </div>
     </div>
-    <div class="bottom_main"></div>
+    <div class="bottom_main">
+      <PluginsManager />
+    </div>
     <div id="line">
       <hr />
       <div class="plus radius" v-on:click="onMorePlugins()"></div>
@@ -19,19 +25,19 @@
 
 <script>
 import { defineComponent } from "vue";
-import PluginsManager from '@/components/PluginsManager.vue'
+import PluginsManager from "@/components/PluginsManager.vue";
+import ImageUpload from "@/components/ImageUpload.vue";
 
 export default defineComponent({
   name: "Home",
   components: {
-    PluginsManager
+    PluginsManager,
+    ImageUpload,
   },
   data() {
-    return {
-    }
+    return {};
   },
-  created() {
-  },
+  created() {},
 });
 </script>
 <style scoped lang="scss">
