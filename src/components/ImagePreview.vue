@@ -1,7 +1,7 @@
 <template>
   <div class="image-preview">
     <div id="save">
-      <select v-model="filetype">
+      <select v-model="filetype" @change="$emit('extensionChanged', $event.target.value)">
         <option
           v-for="option in options"
           :value="option.value"
@@ -60,7 +60,7 @@ export default {
       ],
     };
   },
-  emits: ["folderChanged"],
+  emits: ["folderChanged", "extensionChanged"],
   methods: {
     saveDialog() {
       open({ defaultPath: this.folder, directory: true, multiple: false }).then(

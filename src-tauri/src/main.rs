@@ -3,7 +3,7 @@
   windows_subsystem = "windows"
 )]
 
-use lenna_cli::{images_in_path, plugins};
+use lenna_cli::{images_in_path, write_to_path, plugins};
 use lenna_core::{Config, Pipeline, Pool, ProcessorConfig};
 use scraper::{Html, Selector};
 use serde_json::Value;
@@ -129,6 +129,7 @@ async fn process(
   target: String,
   extension: String,
 ) -> Result<(), String> {
+  println!("Processing {} -> {} as {}", source, target, extension);
   let config = state.config.lock().unwrap();
   let pool = state.pool.lock().unwrap();
   let pipeline = Pipeline::new(config.clone(), pool.clone());
@@ -139,14 +140,15 @@ async fn process(
     match img {
       Ok(img) => {
         let mut img = Box::new(img);
+        let name = img.name.clone();
         pipeline.run(&mut img).unwrap();
-        img.path = target.clone();
-        lenna_core::io::write::write_to_file(&img, image::ImageOutputFormat::Jpeg(80)).unwrap();
+
+        write_to_path(img, target.clone(), extension.clone());
         window
           .emit(
             "info",
             Payload {
-              message: format!("Saved image {}", img.name),
+              message: format!("Saved image {}", name),
             },
           )
           .unwrap();

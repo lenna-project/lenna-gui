@@ -16,6 +16,7 @@
         class="v-step-6"
         :images="resultImages"
         @folderChanged="targetChanged($event)"
+        @extensionChanged="extensionChanged($event)"
       />
     </div>
     <div class="bottom_main">
@@ -48,6 +49,7 @@ export default defineComponent({
     return {
       source: ".",
       target: ".",
+      extension: "png",
       sourceImages: [],
       resultImages: [],
     };
@@ -61,11 +63,15 @@ export default defineComponent({
       console.log("target: ", folder);
       this.target = folder;
     },
+    extensionChanged(extension) {
+      this.extension = extension;
+      console.log(this.extension);
+    },
     processImages() {
       invoke("process", {
         source: this.source,
         target: this.target,
-        extension: "jpg",
+        extension: this.extension,
       }).then((res) => {
         console.log(res);
       });
