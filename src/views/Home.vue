@@ -12,6 +12,8 @@
           process images
         </button>
       </div>
+
+        <ImagePreview class="v-step-6" :images="resultImages" />
     </div>
     <div class="bottom_main">
       <PluginsManager />
@@ -27,15 +29,20 @@
 import { defineComponent } from "vue";
 import PluginsManager from "@/components/PluginsManager.vue";
 import ImageUpload from "@/components/ImageUpload.vue";
+import ImagePreview from "@/components/ImagePreview.vue";
 
 export default defineComponent({
   name: "Home",
   components: {
     PluginsManager,
     ImageUpload,
+    ImagePreview,
   },
   data() {
-    return {};
+    return {
+      sourceImages: [],
+      resultImages: [],
+    };
   },
   created() {},
 });
