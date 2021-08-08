@@ -4,6 +4,7 @@
       extensions="gif,jpg,jpeg,png,webp"
       v-model="files"
       @input-file="inputFile"
+      @folderChanged="$emit('folderChanged', $event)"
       ref="upload"
       class="file-upload"
     >
@@ -39,7 +40,7 @@ export default defineComponent({
     FileUpload,
     VueEasyLightbox,
   },
-  emits: ["changeImage"],
+  emits: ["changeImage", "folderChanged"],
   data() {
     return {
       files: [],

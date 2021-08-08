@@ -60,11 +60,13 @@ export default {
       ],
     };
   },
+  emits: ["folderChanged"],
   methods: {
     saveDialog() {
       open({ defaultPath: this.folder, directory: true, multiple: false }).then(
         (folder) => {
           this.folder = folder;
+          this.$emit("folderChanged", this.folder);
         }
       );
     },

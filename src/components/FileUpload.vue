@@ -36,7 +36,7 @@ export default defineComponent({
       folder: ".",
     };
   },
-  emits: ["update:modelValue", "input-file"],
+  emits: ["update:modelValue", "input-file", "folderChanged"],
   methods: {
     openDialog() {
       open({ defaultPath: this.folder, directory: true, multiple: false }).then(
@@ -69,6 +69,7 @@ export default defineComponent({
         });
         this.$emit("update:modelValue", this.files);
       });
+      this.$emit("folderChanged", folder);
     },
   },
   created() {

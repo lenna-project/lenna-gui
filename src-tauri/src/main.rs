@@ -3,12 +3,13 @@
   windows_subsystem = "windows"
 )]
 
-use lenna_cli::plugins;
-use lenna_core::{Config, Pool, ProcessorConfig};
+use lenna_cli::{images_in_path, plugins};
+use lenna_core::{Config, Pipeline, Pool, ProcessorConfig};
 use scraper::{Html, Selector};
 use serde_json::Value;
 use std::fs::OpenOptions;
 use std::io::Write;
+use std::path::PathBuf;
 use std::sync::Mutex;
 
 struct State {
@@ -114,6 +115,33 @@ async fn get_plugin_ui(state: tauri::State<'_, State>, id: String) -> Result<Ui,
   }
 }
 
+#[tauri::command]
+async fn process(
+  state: tauri::State<'_, State>,
+  source: String,
+  target: String,
+  extension: String,
+) -> Result<(), String> {
+  let config = state.config.lock().unwrap();
+  let pool = state.pool.lock().unwrap();
+  let pipeline = Pipeline::new(config.clone(), pool.clone());
+  let path = PathBuf::from(source);
+  for path in images_in_path(&path) {
+    let img = lenna_core::io::read::read_from_file(path.to_str().unwrap().to_string());
+    match img {
+      Ok(img) => {
+        let mut img = Box::new(img);
+        pipeline.run(&mut img).unwrap();
+        img.path = target.clone();
+        lenna_core::io::write::write_to_file(&img, image::ImageOutputFormat::Jpeg(80)).unwrap();
+      }, Err(err) => {
+        println!("{:?}", err);
+      }
+    }
+  }
+  Ok(())
+}
+
 fn main() {
   let mut plugins = plugins::Plugins::new();
   let plugins_path = match std::env::var("LENNA_PLUGINS") {
@@ -141,7 +169,8 @@ fn main() {
       get_plugin,
       get_plugin_config,
       set_plugin_config,
-      get_plugin_ui
+      get_plugin_ui,
+      process
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

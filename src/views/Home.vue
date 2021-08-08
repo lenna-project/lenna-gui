@@ -5,15 +5,18 @@
       <ImageUpload
         class="v-step-3"
         ref="imageUpload"
-        @changeImage="changeImages($event)"
+        @folderChanged="sourceChanged($event)"
       />
       <div id="process">
         <button class="v-step-5" v-on:click="processImages">
           process images
         </button>
       </div>
-
-        <ImagePreview class="v-step-6" :images="resultImages" />
+      <ImagePreview
+        class="v-step-6"
+        :images="resultImages"
+        @folderChanged="targetChanged($event)"
+      />
     </div>
     <div class="bottom_main">
       <PluginsManager />
@@ -30,6 +33,7 @@ import { defineComponent } from "vue";
 import PluginsManager from "@/components/PluginsManager.vue";
 import ImageUpload from "@/components/ImageUpload.vue";
 import ImagePreview from "@/components/ImagePreview.vue";
+import { invoke } from "@tauri-apps/api/tauri";
 
 export default defineComponent({
   name: "Home",
@@ -40,9 +44,30 @@ export default defineComponent({
   },
   data() {
     return {
+      source: ".",
+      target: ".",
       sourceImages: [],
       resultImages: [],
     };
+  },
+  methods: {
+    sourceChanged(folder) {
+      console.log("source: ", folder);
+      this.source = folder;
+    },
+    targetChanged(folder) {
+      console.log("target: ", folder);
+      this.target = folder;
+    },
+    processImages() {
+      invoke("process", {
+        source: this.source,
+        target: this.target,
+        extension: "jpg",
+      }).then((res) => {
+        console.log(res);
+      });
+    },
   },
   created() {},
 });
