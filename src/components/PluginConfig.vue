@@ -1,15 +1,17 @@
 <template>
-  <v-runtime-template :template="template"></v-runtime-template>
-  <div class="plugin-config" v-if="config && ui">
-    <div v-for="c in config" :key="c.key">
-      <div class="parameter">
-        <label>{{ c.key }}: </label>
-        <input
-          type="number"
-          :placeholder="c.key"
-          v-model.number="c.value"
-          @change="updateConfig()"
-        />
+  <div>
+    <v-runtime-template :template="template"></v-runtime-template>
+    <div class="plugin-config" v-if="ui">
+      <div v-for="c in config" :key="c.key">
+        <div class="parameter">
+          <label>{{ c.key }}: </label>
+          <input
+            type="number"
+            :placeholder="c.key"
+            v-model.number="c.value"
+            @change="updateConfig()"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -32,9 +34,9 @@ export default {
   },
   data() {
     return {
-      ui: null,
+      ui: false,
       config: [],
-      template: null
+      template: null,
     };
   },
   methods: {
@@ -46,10 +48,15 @@ export default {
       this.$emit("changeConfig", config);
     },
     async loadUi() {
-      invoke("get_plugin_ui", { id: this.name }).then((v) => {
-        this.template = v.template;
-        console.log(this.template);
-      });
+      invoke("get_plugin_ui", { id: this.name })
+        .then((v) => {
+          this.template = v.template;
+          console.log(this.template);
+        })
+        .catch((e) => {
+          console.log(e);
+          this.ui = true;
+        });
     },
   },
   created() {

@@ -179,7 +179,7 @@ fn main() {
 
   plugins.load_plugins(&plugins_path);
 
-  let pool: Pool = Pool::default();
+  let pool: Pool = plugins.pool;
   let config: Config = match std::fs::File::open("lenna.yml") {
     Ok(config_file) => serde_yaml::from_reader(config_file).unwrap(),
     Err(err) => {
