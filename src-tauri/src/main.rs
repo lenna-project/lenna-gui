@@ -3,7 +3,7 @@
   windows_subsystem = "windows"
 )]
 
-use lenna_cli::{images_in_path, write_to_path, plugins};
+use lenna_cli::{images_in_path, plugins, write_to_path};
 use lenna_core::{Config, Pipeline, Pool, ProcessorConfig};
 use scraper::{Html, Selector};
 use serde_json::Value;
@@ -11,7 +11,8 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::PathBuf;
 use std::sync::Mutex;
-use tauri::Window;
+use tauri::api::path::resource_dir;
+use tauri::{PackageInfo, Window};
 
 struct State {
   pool: Mutex<Pool>,
@@ -172,15 +173,36 @@ async fn process(
 
 fn main() {
   let mut plugins = plugins::Plugins::new();
+  let package_info = PackageInfo {
+    name: "lenna-gui".to_string(),
+    version: "0.1.0".to_string(),
+  };
   let plugins_path = match std::env::var("LENNA_PLUGINS") {
     Ok(val) => std::path::PathBuf::from(val),
-    _ => std::path::PathBuf::from("plugins/"),
+    _ => match resource_dir(&package_info) {
+      Some(path) => {
+        let mut path = path.clone();
+        path.push("plugins/".to_string());
+        path
+      }
+      _ => std::path::PathBuf::from("plugins/"),
+    },
   };
 
+  let config_path = match resource_dir(&package_info) {
+    Some(path) => {
+      let mut path = path.clone();
+      path.push("lenna.yml".to_string());
+      path
+    }
+    _ => std::path::PathBuf::from("lenna.yml"),
+  };
+  
   plugins.load_plugins(&plugins_path);
 
   let pool: Pool = plugins.pool;
-  let config: Config = match std::fs::File::open("lenna.yml") {
+
+  let config: Config = match std::fs::File::open(config_path.to_str().unwrap()) {
     Ok(config_file) => serde_yaml::from_reader(config_file).unwrap(),
     Err(err) => {
       println!("{:?}", err);

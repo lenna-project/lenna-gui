@@ -1,11 +1,11 @@
 [package]
-name = "app"
+name = "lenna-gui"
 version = "0.1.0"
 description = "Lenna Tauri App"
 authors = ["Christian <chriamue@gmail.com>"]
 license = "MIT"
 repository = ""
-default-run = "app"
+default-run = "lenna-gui"
 edition = "2018"
 build = "src/build.rs"
 
