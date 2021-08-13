@@ -5,6 +5,7 @@
 
 use lenna_cli::{images_in_path, plugins, write_to_path};
 use lenna_core::{Config, Pipeline, Pool, ProcessorConfig};
+use base64::encode;
 use scraper::{Html, Selector};
 use serde_json::Value;
 use std::fs::OpenOptions;
@@ -123,6 +124,23 @@ async fn get_plugin_ui(state: tauri::State<'_, State>, id: String) -> Result<Ui,
 }
 
 #[tauri::command]
+async fn get_plugin_icon(state: tauri::State<'_, State>, id: String) -> Result<String, String> {
+  let pool = state.pool.lock().unwrap();
+  let plugin = pool.get(&id);
+  match plugin {
+    Some(plugin) => match plugin.icon() {
+      Some(icon) => {
+        let b64_img = encode(icon);
+        let img = format!("data:image/jpeg;base64,{}", b64_img);
+        Ok(img)
+      }
+      _ => Err("Plugin has no icon.".to_string()),
+    },
+    _ => Err("No such plugin.".to_string()),
+  }
+}
+
+#[tauri::command]
 async fn process(
   window: Window,
   state: tauri::State<'_, State>,
@@ -224,6 +242,7 @@ fn main() {
       get_plugin_config,
       set_plugin_config,
       get_plugin_ui,
+      get_plugin_icon,
       process
     ])
     .run(tauri::generate_context!())

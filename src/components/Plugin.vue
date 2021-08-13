@@ -32,6 +32,7 @@
 <script>
 import { defineComponent } from "vue";
 import PluginConfig from "./PluginConfig.vue";
+import { invoke } from "@tauri-apps/api/tauri";
 
 export default defineComponent({
   name: "Plugin",
@@ -41,7 +42,7 @@ export default defineComponent({
     defaultConfig: Object,
   },
   components: {
-    PluginConfig
+    PluginConfig,
   },
   data() {
     return {
@@ -59,6 +60,15 @@ export default defineComponent({
       this.config = this.defaultConfig;
       console.log(this.config);
     },
+    async loadIcon() {
+      invoke("get_plugin_icon", { id: this.name })
+        .then((icon) => {
+          this.icon = icon;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
     async updateConfig(config) {
       this.$emit("changeConfig", config);
     },
@@ -69,6 +79,7 @@ export default defineComponent({
   created() {
     console.log("created");
     this.loadDefaultConfig();
+    this.loadIcon();
   },
 });
 </script>
