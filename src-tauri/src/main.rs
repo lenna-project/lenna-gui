@@ -3,9 +3,9 @@
   windows_subsystem = "windows"
 )]
 
+use base64::encode;
 use lenna_cli::{images_in_path, plugins, write_to_path};
 use lenna_core::{Config, Pipeline, Pool, ProcessorConfig};
-use base64::encode;
 use scraper::{Html, Selector};
 use serde_json::Value;
 use std::fs::OpenOptions;
@@ -13,6 +13,7 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::api::path::resource_dir;
+use tauri::{CustomMenuItem, Menu, MenuItem, Submenu};
 use tauri::{PackageInfo, Window};
 
 struct State {
@@ -189,6 +190,15 @@ async fn process(
   Ok(())
 }
 
+fn menu() -> Menu {
+  let quit = CustomMenuItem::new("quit".to_string(), "Quit");
+  let submenu = Submenu::new("File", Menu::new().add_item(quit));
+  Menu::new()
+    .add_native_item(MenuItem::Copy)
+    .add_item(CustomMenuItem::new("hide", "Hide"))
+    .add_submenu(submenu)
+}
+
 fn main() {
   let mut plugins = plugins::Plugins::new();
   let package_info = PackageInfo {
@@ -215,7 +225,6 @@ fn main() {
     }
     _ => std::path::PathBuf::from("lenna.yml"),
   };
-  
   plugins.load_plugins(&plugins_path);
 
   let pool: Pool = plugins.pool;
@@ -234,6 +243,13 @@ fn main() {
   };
 
   tauri::Builder::default()
+    .menu(menu())
+    .on_menu_event(|event| match event.menu_item_id() {
+      "quit" => {
+        std::process::exit(0);
+      }
+      _ => {}
+    })
     .manage(state)
     .invoke_handler(tauri::generate_handler![
       get_config,
