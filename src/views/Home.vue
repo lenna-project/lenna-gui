@@ -25,6 +25,7 @@
       <hr />
       <div class="plus radius" v-on:click="onMorePlugins()"></div>
     </div>
+    <help/>
   </div>
 </template>
 
@@ -36,6 +37,7 @@ import ImageUpload from "@/components/ImageUpload.vue";
 import ImagePreview from "@/components/ImagePreview.vue";
 import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from "@tauri-apps/api/event";
+import Help from "@lenna-project/lenna-web/src/components/Help.vue";
 
 export default defineComponent({
   name: "Home",
@@ -43,6 +45,7 @@ export default defineComponent({
     PluginsManager,
     ImageUpload,
     ImagePreview,
+    Help
   },
   data() {
     return {

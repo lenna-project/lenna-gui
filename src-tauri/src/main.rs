@@ -195,7 +195,6 @@ fn menu() -> Menu {
   let submenu = Submenu::new("File", Menu::new().add_item(quit));
   Menu::new()
     .add_native_item(MenuItem::Copy)
-    .add_item(CustomMenuItem::new("hide", "Hide"))
     .add_submenu(submenu)
 }
 
