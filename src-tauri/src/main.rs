@@ -13,7 +13,7 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::api::path::resource_dir;
-use tauri::{CustomMenuItem, Menu, MenuItem, Submenu};
+use tauri::{Menu, MenuItem, Submenu};
 use tauri::{PackageInfo, Window};
 
 struct State {
@@ -191,11 +191,12 @@ async fn process(
 }
 
 fn menu() -> Menu {
-  let quit = CustomMenuItem::new("quit".to_string(), "Quit");
-  let submenu = Submenu::new("File", Menu::new().add_item(quit));
-  Menu::new()
-    .add_native_item(MenuItem::Copy)
-    .add_submenu(submenu)
+  Menu::new().add_submenu(Submenu::new(
+    "Lenna",
+    Menu::new()
+      .add_native_item(MenuItem::Hide)
+      .add_native_item(MenuItem::Quit),
+  ))
 }
 
 fn main() {
@@ -243,12 +244,6 @@ fn main() {
 
   tauri::Builder::default()
     .menu(menu())
-    .on_menu_event(|event| match event.menu_item_id() {
-      "quit" => {
-        std::process::exit(0);
-      }
-      _ => {}
-    })
     .manage(state)
     .invoke_handler(tauri::generate_handler![
       get_config,
