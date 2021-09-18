@@ -37,7 +37,7 @@ import ImageUpload from "@/components/ImageUpload.vue";
 import ImagePreview from "@/components/ImagePreview.vue";
 import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from "@tauri-apps/api/event";
-import Help from "@lenna-project/lenna-web/src/components/Help.vue";
+import { Help } from "@lenna-proj/lenna-web";
 
 export default defineComponent({
   name: "Home",

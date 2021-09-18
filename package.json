@@ -13,7 +13,7 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@lenna-project/lenna-web": "https://github.com/lenna-project/lenna-web",
+    "@lenna-proj/lenna-web": "^0.0.7",
     "@tauri-apps/api": "^1.0.0-beta.8",
     "core-js": "^3.16.3",
     "postcss": "^8.3.6",
