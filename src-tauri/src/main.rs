@@ -15,6 +15,7 @@ use std::sync::Mutex;
 use tauri::api::path::resource_dir;
 use tauri::{Menu, MenuItem, Submenu};
 use tauri::{PackageInfo, Window};
+use semver::Version;
 
 struct State {
   pool: Mutex<Pool>,
@@ -202,12 +203,14 @@ fn menu() -> Menu {
 fn main() {
   let mut plugins = plugins::Plugins::new();
   let package_info = PackageInfo {
+    authors: "chriamue",
     name: "lenna-gui".to_string(),
-    version: "0.1.0".to_string(),
+    version: Version::new(0,1,0),
+    description: "convert images"
   };
   let plugins_path = match std::env::var("LENNA_PLUGINS") {
     Ok(val) => std::path::PathBuf::from(val),
-    _ => match resource_dir(&package_info) {
+    _ => match resource_dir(&package_info, &Default::default()) {
       Some(path) => {
         let mut path = path.clone();
         path.push("plugins/".to_string());
@@ -217,7 +220,7 @@ fn main() {
     },
   };
 
-  let config_path = match resource_dir(&package_info) {
+  let config_path = match resource_dir(&package_info, &Default::default()) {
     Some(path) => {
       let mut path = path.clone();
       path.push("lenna.yml".to_string());
